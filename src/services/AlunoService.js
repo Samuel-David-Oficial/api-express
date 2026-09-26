@@ -1,25 +1,27 @@
 const alunos = require("../models/alunoModel");
+const prisma = require("../prisma");
+class AlunoService {
+    async findMany(page = 1, pageSize = 10, orderBy = "id", order = "asc") {
+        const pageNum = Number(page) || 1;
+        const sizeNum = Number(pageSize) || 10;
 
-class AlunoService{
-    findMany(){
-        return alunos;
-    }
+        const validOrder = ["asc", "desc"].includes(String(order).toLowerCase())
+            ? String(order).toLowerCase()
+            : "asc";
 
-    create(aluno){
-        const {nome, email} = aluno;
+        const skip = (pageNum - 1) * sizeNum;
+        const take = sizeNum;
 
-        if(!nome || !email){
-            return null;
-        }
+        const [alunos, total] = await Promise.all([
+            prisma.aluno.findMany({
+                skip,
+                take,
+                orderBy: { [orderBy]: validOrder }
+            }),
+            prisma.aluno.count()
+        ]);
 
-        const novoAluno = {
-            id: alunos[alunos.length-1].id + 1,
-            nome, email
-        };
-
-        alunos.push(novoAluno);
-
-        return novoAluno;
+        return { alunos, total };
     }
 
     delete(id){

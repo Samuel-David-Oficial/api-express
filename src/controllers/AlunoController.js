@@ -1,19 +1,17 @@
 const alunoService = require("../services/AlunoService");
 
-class AlunoController{
-    findMany(request, response){
-        const alunos = alunoService.findMany();
-        return response.status(200).json({alunos});
-    }
+class AlunoController {
+    async findMany(request, response) {
+        try {
+            const { page = 1, pageSize = 10, orderBy = "id", order, tipoordenacao } = request.query;
+            const sortOrder = order || tipoordenacao || "asc";
 
-    create(request, response){
-        const aluno = alunoService.create(request.body);
-
-        if(!aluno){
-            response.status(400).json({error: "Nome e Email são obrigatórios"});
+            const result = await alunoService.findMany(page, pageSize, orderBy, sortOrder);
+            return response.status(200).json(result);
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            return response.status(statusCode).json({ error: error.message });
         }
-
-        return response.status(201).json({aluno});
     }
 
     delete(request, response){
