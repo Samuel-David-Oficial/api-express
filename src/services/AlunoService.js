@@ -25,7 +25,6 @@ class AlunoService {
 
         return { alunos, total };
     }
-
     async findUnique(id) {
         const alunoId = parseInt(id, 10);
 
@@ -43,7 +42,34 @@ class AlunoService {
 
         return aluno;
     }
+    async update(id, alunoData) {
+        const alunoId = parseInt(id, 10);
+        if (isNaN(alunoId)) {
+            throw new AlunoInvalidoError("ID fornecido é inválido");
+        }
 
+        const { nome, email } = alunoData;
+        if (!nome && !email) {
+        throw new AlunoInvalidoError("Informe ao menos um campo para atualização (nome ou email)");
+        }
+
+        await this.findUnique(alunoId);
+
+        try {
+            return await prisma.aluno.update({
+                where: { id: alunoId },
+                data: {
+                    ...(nome && { nome }),
+                    ...(email && { email })
+                }
+            });
+        } catch (error) {
+            if (error.code === "P2002") {
+                throw new AlunoInvalidoError("Email já cadastrado para outro aluno");
+            }
+            throw error;
+        }
+    }
     delete(id){
 
         const alunoIndex = alunos.findIndex((a)=> a.id === parseInt(id));
