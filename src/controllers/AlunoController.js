@@ -22,16 +22,15 @@ class AlunoController {
         }
     }
 
-    delete(request, response){
-        const {id} = request.params;
-
-        const aluno = alunoService.delete(id);
-
-        if(!aluno){
-            response.status(404).json({error: "Aluno não encontrado"});
+    async delete(request, response) {
+        try {
+            const { id } = request.params;
+            await alunoService.delete(id);
+            return response.status(204).end();
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            return response.status(statusCode).json({ error: error.message });
         }
-
-        return response.status(204).end();
     }
 }
 

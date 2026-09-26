@@ -70,17 +70,15 @@ class AlunoService {
             throw error;
         }
     }
-    delete(id){
-
-        const alunoIndex = alunos.findIndex((a)=> a.id === parseInt(id));
-
-        if(alunoIndex == -1){
-            return null;
+    async delete(id) {
+        const alunoId = parseInt(id, 10);
+        if (isNaN(alunoId)) {
+            throw new AlunoInvalidoError("ID fornecido é inválido");
         }
-
-        const [aluno] = alunos.splice(alunoIndex, 1);
-
-        return aluno;
+        await this.findUnique(alunoId);
+        return await prisma.aluno.delete({
+            where: { id: alunoId }
+        });
     }
 }
 
