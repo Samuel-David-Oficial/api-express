@@ -1,5 +1,7 @@
 const alunos = require("../models/alunoModel");
 const prisma = require("../prisma");
+const AlunoInvalidoError = require("../errors/AlunoInvalidoError");
+const AlunoNaoEncontradoError = require("../errors/AlunoNaoEncontradoError");
 class AlunoService {
     async findMany(page = 1, pageSize = 10, orderBy = "id", order = "asc") {
         const pageNum = Number(page) || 1;
@@ -22,6 +24,24 @@ class AlunoService {
         ]);
 
         return { alunos, total };
+    }
+
+    async findUnique(id) {
+        const alunoId = parseInt(id, 10);
+
+        if (isNaN(alunoId)) {
+            throw new AlunoInvalidoError("ID fornecido é inválido");
+        }
+
+        const aluno = await prisma.aluno.findUnique({
+            where: { id: alunoId }
+        });
+
+        if (!aluno) {
+            throw new AlunoNaoEncontradoError();
+        }
+
+        return aluno;
     }
 
     delete(id){

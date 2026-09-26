@@ -1,13 +1,11 @@
 const alunoService = require("../services/AlunoService");
 
 class AlunoController {
-    async findMany(request, response) {
+    async findUnique(request, response) {
         try {
-            const { page = 1, pageSize = 10, orderBy = "id", order, tipoordenacao } = request.query;
-            const sortOrder = order || tipoordenacao || "asc";
-
-            const result = await alunoService.findMany(page, pageSize, orderBy, sortOrder);
-            return response.status(200).json(result);
+            const { id } = request.params;
+            const aluno = await alunoService.findUnique(id);
+            return response.status(200).json(aluno);
         } catch (error) {
             const statusCode = error.statusCode || 500;
             return response.status(statusCode).json({ error: error.message });
